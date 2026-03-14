@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
+  <defs>
+    <pattern id="hex" x="0" y="0" width="60" height="104" patternUnits="userSpaceOnUse">
+      <!-- Hexagonal Islamic geometric pattern -->
+      <polygon points="30,2 58,17 58,51 30,66 2,51 2,17" fill="none" stroke="currentColor" stroke-width="1.5"/>
+      <polygon points="30,36 58,51 58,85 30,102 2,85 2,51" fill="none" stroke="currentColor" stroke-width="1.5"/>
+      <!-- Stars inside hexagons -->
+      <polygon points="30,14 34,24 44,24 36,30 39,40 30,34 21,40 24,30 16,24 26,24" fill="none" stroke="currentColor" stroke-width=".8"/>
+      <polygon points="30,48 34,58 44,58 36,64 39,74 30,68 21,74 24,64 16,58 26,58" fill="none" stroke="currentColor" stroke-width=".8"/>
+    </pattern>
+  </defs>
+  <rect width="400" height="400" fill="url(#hex)" opacity="0.4"/>
+</svg>
