@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Kalkulator Zakat Mal dan Zakat Emas — hitung zakat penghasilan dan emas berdasarkan nisab terkini.">
+    <title>Kalkulator Zakat — Ramadhan Portal</title>
+    <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <style>
+        .zakat-type-btn {
+            flex: 1;
+            padding: 20px 16px;
+            border: 2px solid var(--clr-border);
+            border-radius: var(--radius-lg);
+            background: var(--clr-bg-card);
+            cursor: pointer;
+            transition: all var(--trans-base);
+            text-align: center;
+        }
+
+        .zakat-type-btn:hover {
+            border-color: var(--clr-primary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .zakat-type-btn.active {
+            border-color: var(--clr-primary);
+            background: rgba(26, 107, 74, .06);
+            box-shadow: 0 0 0 3px rgba(26, 107, 74, .1);
+        }
+
+        .zakat-type-btn .type-icon-wrap {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--clr-bg-alt);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            color: var(--clr-text-muted);
+            transition: all var(--trans-fast);
+        }
+
+        .zakat-type-btn.active .type-icon-wrap {
+            background: var(--clr-primary);
+            color: #fff;
+        }
+
+        .result-panel-inner {
+            background: linear-gradient(135deg, var(--clr-primary-dark), var(--clr-primary));
+            border-radius: var(--radius-xl);
+            padding: 40px 32px;
+            color: #fff;
+            text-align: center;
+            position: sticky;
+            top: calc(var(--nav-h) + 24px);
+        }
+
+        .result-panel-inner.belum-wajib {
+            background: linear-gradient(135deg, #374151, #4b5563);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: var(--radius-full);
+            font-size: var(--text-sm);
+            font-weight: 700;
+            background: rgba(255, 255, 255, .15);
+            margin-bottom: 20px;
+        }
+
+        .zakat-amount {
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: var(--clr-accent-light);
+            line-height: 1;
+            margin: 16px 0;
+            word-break: break-all;
+        }
+
+        .nisab-info {
+            background: rgba(255, 255, 255, .08);
+            border-radius: var(--radius-md);
+            padding: 12px 16px;
+            margin-top: 16px;
+            font-size: var(--text-sm);
+            color: rgba(255, 255, 255, .65);
+            text-align: left;
+        }
+
+        .nisab-info p+p {
+            margin-top: 4px;
+        }
+
+        .rp-prefix {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: .875rem;
+            color: var(--clr-text-muted);
+            font-weight: 600;
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="site-wrapper">
+
+        <nav class="navbar" role="navigation" aria-label="Main navigation">
+            <div class="nav-inner">
+                <a href="index.html" class="nav-logo" aria-label="Ramadhan Portal Home">
+                    <div class="logo-icon">
+                        <svg viewBox="0 0 24 24" fill="none" width="20" height="20">
+                            <path
+                                d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"
+                                stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                    <div>
+                        <span class="logo-text">Ramadhan Portal</span>
+                        <span class="logo-sub">Islamic Productivity</span>
+                    </div>
+                </a>
+                <div class="nav-menu" role="list">
+                    <a href="index.html" class="nav-link" data-page="index.html" role="listitem">Beranda</a>
+                    <a href="imsakiyah.html" class="nav-link" data-page="imsakiyah.html" role="listitem">Imsakiyah</a>
+                    <a href="dzikir.html" class="nav-link" data-page="dzikir.html" role="listitem">Dzikir</a>
+                    <a href="zakat.html" class="nav-link" data-page="zakat.html" role="listitem">Zakat</a>
+                    <a href="tracker.html" class="nav-link" data-page="tracker.html" role="listitem">Tracker</a>
+                    <a href="prayers.html" class="nav-link" data-page="prayers.html" role="listitem">Doa</a>
+                </div>
+                <div class="nav-actions">
+                    <button class="dark-toggle" id="dark-toggle" aria-label="Toggle dark mode"
+                        aria-pressed="false"></button>
+                </div>
+                <button class="hamburger" aria-label="Open menu"
+                    aria-expanded="false"><span></span><span></span><span></span></button>
+            </div>
+        </nav>
+        <nav class="nav-mobile" aria-label="Mobile navigation">
+            <a href="index.html" class="nav-link" data-page="index.html">Beranda</a>
+            <a href="imsakiyah.html" class="nav-link" data-page="imsakiyah.html">Imsakiyah</a>
+            <a href="dzikir.html" class="nav-link" data-page="dzikir.html">Dzikir Counter</a>
+            <a href="zakat.html" class="nav-link" data-page="zakat.html">Kalkulator Zakat</a>
+            <a href="tracker.html" class="nav-link" data-page="tracker.html">Ramadan Tracker</a>
+            <a href="prayers.html" class="nav-link" data-page="prayers.html">Doa Sahur &amp; Buka</a>
+        </nav>
+
+        <main>
+            <header class="page-header">
+                <div class="container" style="position:relative;z-index:1">
+                    <span class="badge badge-accent" style="margin-bottom:16px">Kalkulator Zakat</span>
+                    <h1>Kalkulator Zakat Mal</h1>
+                    <p>Hitung kewajiban zakat berdasarkan nisab dan harga emas terkini</p>
+                </div>
+            </header>
+
+            <section class="section-sm">
+                <div class="container">
+
+                    <div class="alert alert-info" style="margin-bottom:24px;border-radius:12px">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" aria-hidden="true">
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="12" y1="8" x2="12" y2="12" />
+                            <line x1="12" y1="16" x2="12.01" y2="16" />
+                        </svg>
+                        <div>
+                            <strong>Tentang Nisab Zakat</strong>
+                            <p style="margin-top:4px;font-size:.875rem;color:inherit">
+                                Nisab zakat mal setara 85 gram emas. Nilai nisab saat ini ≈&nbsp;<strong
+                                    id="nisab-value-display" style="color:inherit">–</strong> (berdasarkan harga emas
+                                yang kamu masukkan).
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="zakat-layout">
+
+                        <div>
+                            <!-- Type Selector -->
+                            <div style="margin-bottom:24px">
+                                <p class="form-label" style="margin-bottom:12px">Jenis Zakat</p>
+                                <div style="display:flex;gap:12px;flex-wrap:wrap" role="group"
+                                    aria-label="Pilih jenis zakat">
+
+                                    <button class="zakat-type-btn active" data-type="income" aria-pressed="true">
+                                        <div class="type-icon-wrap">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                                <rect x="2" y="7" width="20" height="14" rx="2" />
+                                                <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
+                                            </svg>
+                                        </div>
+                                        <div style="font-weight:700;font-size:.875rem;color:var(--clr-text)">Zakat
+                                            Penghasilan</div>
+                                        <div style="font-size:.75rem;color:var(--clr-text-muted);margin-top:4px">Dari
+                                            gaji &amp; pendapatan</div>
+                                    </button>
+
+                                    <button class="zakat-type-btn" data-type="gold" aria-pressed="false">
+                                        <div class="type-icon-wrap">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                                <polygon
+                                                    points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                                            </svg>
+                                        </div>
+                                        <div style="font-weight:700;font-size:.875rem;color:var(--clr-text)">Zakat Emas
+                                        </div>
+                                        <div style="font-size:.75rem;color:var(--clr-text-muted);margin-top:4px">Dari
+                                            kepemilikan emas</div>
+                                    </button>
+
+                                </div>
+                            </div>
+
+                            <!-- Income Form -->
+                            <div id="income-form" class="card">
+                                <h3 style="font-size:1.05rem;margin-bottom:24px">Data Penghasilan</h3>
+                                <div style="display:flex;flex-direction:column;gap:20px">
+                                    <div class="form-group">
+                                        <label class="form-label" for="income-month">Penghasilan Bulanan (Rp)</label>
+                                        <p class="form-hint">Gaji, honor, atau pendapatan rutin per bulan</p>
+                                        <div style="position:relative;margin-top:4px">
+                                            <span class="rp-prefix">Rp</span>
+                                            <input type="number" id="income-month" class="form-control"
+                                                placeholder="5.000.000" min="0" style="padding-left:36px">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="income-other">Pendapatan Lain-lain / Bonus
+                                            (Rp)</label>
+                                        <p class="form-hint">THR, bonus, atau penghasilan sampingan (opsional)</p>
+                                        <div style="position:relative;margin-top:4px">
+                                            <span class="rp-prefix">Rp</span>
+                                            <input type="number" id="income-other" class="form-control" placeholder="0"
+                                                min="0" style="padding-left:36px">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="gold-price">Harga Emas per Gram (Rp)</label>
+                                        <p class="form-hint">Cek harga emas Antam hari ini untuk akurasi</p>
+                                        <div style="position:relative;margin-top:4px">
+                                            <span class="rp-prefix">Rp</span>
+                                            <input type="number" id="gold-price" class="form-control"
+                                                placeholder="1.050.000" min="0" style="padding-left:36px">
+                                        </div>
+                                    </div>
+                                    <div
+                                        style="background:rgba(26,107,74,.06);border:1px solid rgba(26,107,74,.1);border-radius:10px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                            stroke="var(--clr-primary)" stroke-width="2"
+                                            style="flex-shrink:0;margin-top:2px" aria-hidden="true">
+                                            <circle cx="12" cy="12" r="10" />
+                                            <line x1="12" y1="8" x2="12" y2="12" />
+                                            <line x1="12" y1="16" x2="12.01" y2="16" />
+                                        </svg>
+                                        <p style="font-size:.8rem;color:var(--clr-text-muted)">Zakat penghasilan
+                                            dihitung sebesar <strong>2.5%</strong> dari total penghasilan tahunan jika
+                                            telah mencapai nisab.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Gold Form -->
+                            <div id="gold-form" class="card" hidden>
+                                <h3 style="font-size:1.05rem;margin-bottom:24px">Data Kepemilikan Emas</h3>
+                                <div style="display:flex;flex-direction:column;gap:20px">
+                                    <div class="form-group">
+                                        <label class="form-label" for="gold-owned">Jumlah Emas Dimiliki (gram)</label>
+                                        <p class="form-hint">Emas yang sudah dimiliki selama 1 tahun penuh (haul)</p>
+                                        <input type="number" id="gold-owned" class="form-control" placeholder="0"
+                                            min="0" step="0.1" style="margin-top:4px">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="gold-price-2">Harga Emas per Gram (Rp)</label>
+                                        <p class="form-hint">Gunakan harga emas Antam terbaru</p>
+                                        <div style="position:relative;margin-top:4px">
+                                            <span class="rp-prefix">Rp</span>
+                                            <input type="number" id="gold-price-2" class="form-control"
+                                                placeholder="1.050.000" min="0" style="padding-left:36px">
+                                        </div>
+                                    </div>
+                                    <div
+                                        style="background:var(--clr-bg-alt);border-radius:10px;padding:14px 16px;font-size:.8rem;display:flex;flex-direction:column;gap:6px">
+                                        <div style="display:flex;justify-content:space-between">
+                                            <span style="color:var(--clr-text-muted)">Nisab emas</span>
+                                            <strong>85 gram</strong>
+                                        </div>
+                                        <div style="display:flex;justify-content:space-between">
+                                            <span style="color:var(--clr-text-muted)">Tarif zakat</span>
+                                            <strong>2.5%</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Actions -->
+                            <div style="display:flex;gap:12px;margin-top:20px">
+                                <button id="btn-calculate" class="btn btn-primary btn-lg" style="flex:2">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2.5" aria-hidden="true">
+                                        <rect x="2" y="3" width="20" height="14" rx="2" />
+                                        <line x1="8" y1="21" x2="16" y2="21" />
+                                        <line x1="12" y1="17" x2="12" y2="21" />
+                                    </svg>
+                                    Hitung Zakat
+                                </button>
+                                <button id="btn-reset-calc" class="btn btn-ghost" aria-label="Reset form">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2.5" aria-hidden="true">
+                                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                                        <path d="M3 3v5h5" />
+                                    </svg>
+                                    Reset
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Result Panel -->
+                        <div>
+                            <div id="result-panel" style="display:none" role="region" aria-live="polite"
+                                aria-label="Hasil perhitungan zakat">
+                                <div class="result-panel-inner">
+                                    <div id="result-status"></div>
+                                    <p style="font-size:.8rem;color:rgba(255,255,255,.6);margin-bottom:4px">Zakat yang
+                                        harus dibayar</p>
+                                    <div id="result-amount" class="zakat-amount">Rp 0</div>
+                                    <div class="nisab-info">
+                                        <p id="result-income"></p>
+                                        <p id="result-nisab"></p>
+                                        <p id="result-rate"></p>
+                                        <p id="result-extra"></p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="result-placeholder" class="card" style="text-align:center;padding:48px">
+                                <div
+                                    style="width:56px;height:56px;background:var(--clr-bg-alt);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                        stroke="var(--clr-text-muted)" stroke-width="1.8" aria-hidden="true">
+                                        <rect x="2" y="3" width="20" height="14" rx="2" />
+                                        <line x1="8" y1="21" x2="16" y2="21" />
+                                        <line x1="12" y1="17" x2="12" y2="21" />
+                                    </svg>
+                                </div>
+                                <h4 style="margin-bottom:8px">Siap Menghitung</h4>
+                                <p style="font-size:.875rem">Isi formulir dan klik <strong>Hitung Zakat</strong> untuk
+                                    melihat kewajiban zakatmu.</p>
+                            </div>
+
+                            <div class="card" style="margin-top:20px">
+                                <h4 style="font-size:1rem;margin-bottom:16px">Ketentuan Zakat Mal</h4>
+                                <div style="display:flex;flex-direction:column;gap:14px">
+                                    <div style="display:flex;gap:12px;font-size:.875rem">
+                                        <div
+                                            style="width:32px;height:32px;border-radius:8px;background:rgba(26,107,74,.08);color:var(--clr-primary);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2.5">
+                                                <polyline points="20 6 9 17 4 12" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <strong>Nisab</strong>
+                                            <p style="color:var(--clr-text-muted);margin-top:2px">Minimal 85 gram emas —
+                                                harta wajib dizakatkan jika mencapai nisab.</p>
+                                        </div>
+                                    </div>
+                                    <div style="display:flex;gap:12px;font-size:.875rem">
+                                        <div
+                                            style="width:32px;height:32px;border-radius:8px;background:rgba(26,107,74,.08);color:var(--clr-primary);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2.5">
+                                                <polyline points="20 6 9 17 4 12" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <strong>Haul</strong>
+                                            <p style="color:var(--clr-text-muted);margin-top:2px">Harta sudah dimiliki
+                                                selama 1 tahun Hijriah penuh.</p>
+                                        </div>
+                                    </div>
+                                    <div style="display:flex;gap:12px;font-size:.875rem">
+                                        <div
+                                            style="width:32px;height:32px;border-radius:8px;background:rgba(26,107,74,.08);color:var(--clr-primary);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2.5">
+                                                <polyline points="20 6 9 17 4 12" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <strong>Tarif 2.5%</strong>
+                                            <p style="color:var(--clr-text-muted);margin-top:2px">Dari total
+                                                harta/penghasilan yang sudah mencapai nisab dan haul.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer role="contentinfo">
+            <div class="container">
+                <div
+                    style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;padding-bottom:20px;border-bottom:1px solid rgba(255,255,255,.08)">
+                    <span style="font-weight:700;color:#fff">Ramadhan Portal</span>
+                    <nav style="display:flex;gap:20px" aria-label="Footer links">
+                        <a href="index.html" style="color:rgba(255,255,255,.5);font-size:.875rem">Beranda</a>
+                        <a href="dzikir.html" style="color:rgba(255,255,255,.5);font-size:.875rem">Dzikir</a>
+                        <a href="tracker.html" style="color:rgba(255,255,255,.5);font-size:.875rem">Tracker</a>
+                    </nav>
+                </div>
+                <p style="color:rgba(255,255,255,.3);font-size:.75rem;text-align:center;padding-top:16px">&copy; 2025
+                    Ramadhan Portal &middot; Hanya sebagai referensi, bukan fatwa hukum</p>
+            </div>
+        </footer>
+
+    </div>
+    <script src="js/main.js"></script>
+    <script src="js/zakat.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Sync gold-price-2 with gold-price for JS (zakat.js uses #gold-price)
+            const gp2 = document.getElementById('gold-price-2');
+            const gp = document.getElementById('gold-price');
+            if (gp2) {
+                gp2.addEventListener('input', () => { if (gp) gp.value = gp2.value; });
+            }
+            const nisabEl = document.getElementById('nisab-value-display');
+            const goldInput = document.getElementById('gold-price') || gp2;
+            if (nisabEl && goldInput) {
+                const update = () => {
+                    const p = parseFloat(goldInput.value) || 1050000;
+                    nisabEl.textContent = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(85 * p);
+                };
+                goldInput.addEventListener('input', update);
+                update();
+            }
+            document.getElementById('btn-calculate')?.addEventListener('click', () => {
+                document.getElementById('result-placeholder').style.display = 'none';
+                document.getElementById('result-panel').style.display = 'block';
+            });
+            document.getElementById('btn-reset-calc')?.addEventListener('click', () => {
+                document.getElementById('result-placeholder').style.display = 'block';
+                document.getElementById('result-panel').style.display = 'none';
+            });
+        });
+    </script>
+</body>
+
+</html>
